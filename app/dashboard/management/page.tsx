@@ -125,7 +125,7 @@ export default function ManagementDashboard() {
               <Clock className="h-4 w-4 mr-2" /> Lista de Turnos
             </TabsTrigger>
             <TabsTrigger value="chat">
-              <MessageSquare className="h-4 w-4 mr-2" /> Chat con Secretaría
+              <MessageSquare className="h-4 w-4 mr-2" /> Chat con Ayudantía
             </TabsTrigger>
           </TabsList>
 
@@ -138,7 +138,7 @@ export default function ManagementDashboard() {
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4">
-            <ChatInterface sender="management" recipient="secretary" />
+            <ChatInterface sender="management" recipient="assistant" />
           </TabsContent>
         </Tabs>
       </main>

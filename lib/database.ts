@@ -16,6 +16,11 @@ export function initializeDatabase() {
   if (!localStorage.getItem("notifications")) {
     localStorage.setItem("notifications", JSON.stringify([]))
   }
+
+  // Initialize users if not exists
+  if (!localStorage.getItem("users")) {
+    localStorage.setItem("users", JSON.stringify([]))
+  }
 }
 
 export function getFromDB(key: string) {

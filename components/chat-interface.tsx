@@ -66,10 +66,20 @@ export default function ChatInterface({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
+  // Helper function to get the display name for a role
+  const getRoleDisplayName = (role) => {
+    return role === "assistant" ? "Ayudantía" : role === "management" ? "Jefatura" : "Administrador"
+  }
+
+  // Helper function to get the avatar letter for a role
+  const getRoleAvatarLetter = (role) => {
+    return role === "assistant" ? "A" : role === "management" ? "J" : "AD"
+  }
+
   return (
     <div className="flex flex-col h-[600px] border rounded-lg overflow-hidden">
       <div className="bg-muted p-3 border-b">
-        <h3 className="font-medium">Chat con {recipient === "secretary" ? "Secretaría" : "Jefatura"}</h3>
+        <h3 className="font-medium">Chat con {getRoleDisplayName(recipient)}</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -86,10 +96,14 @@ export default function ChatInterface({
                 <Avatar className="h-8 w-8">
                   <AvatarFallback
                     className={
-                      message.sender === "secretary" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
+                      message.sender === "assistant"
+                        ? "bg-blue-100 text-blue-600"
+                        : message.sender === "management"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-purple-100 text-purple-600"
                     }
                   >
-                    {message.sender === "secretary" ? "S" : "J"}
+                    {getRoleAvatarLetter(message.sender)}
                   </AvatarFallback>
                 </Avatar>
                 <Card className={`${message.sender === sender ? "bg-primary text-primary-foreground" : ""}`}>

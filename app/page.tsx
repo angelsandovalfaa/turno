@@ -10,15 +10,21 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { initializeDatabase } from "@/lib/database"
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const [activeRole, setActiveRole] = useState<"secretary" | "management">("secretary")
+  const [activeRole, setActiveRole] = useState<"assistant" | "management">("assistant")
 
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+  })
+
+  // Initialize database on first load
+  useState(() => {
+    initializeDatabase()
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,20 +45,44 @@ export default function LoginPage() {
       return
     }
 
-    // In a real app, you would authenticate with the server here
-    // For demo purposes, we'll use hardcoded credentials
-    if (activeRole === "secretary" && formData.username === "secretaria" && formData.password === "123456") {
-      localStorage.setItem("user", JSON.stringify({ role: "secretary", name: "Secretaria" }))
-      router.push("/dashboard/secretary")
-    } else if (activeRole === "management" && formData.username === "jefe" && formData.password === "123456") {
-      localStorage.setItem("user", JSON.stringify({ role: "management", name: "Jefatura" }))
-      router.push("/dashboard/management")
+    // Check for admin credentials in management tab
+    if (activeRole === "management" && formData.username === "admin" && formData.password === "admin123") {
+      localStorage.setItem("user", JSON.stringify({ role: "admin", name: "Administrador" }))
+      router.push("/dashboard/admin")
+      return
+    }
+
+    // Check if user exists in the database
+    const users = JSON.parse(localStorage.getItem("users") || "[]")
+    const user = users.find(
+      (u) => u.username === formData.username && u.password === formData.password && u.role === activeRole,
+    )
+
+    if (user) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          role: user.role,
+          name: user.name,
+          id: user.id,
+        }),
+      )
+      router.push(`/dashboard/${user.role}`)
     } else {
-      toast({
-        title: "Error de autenticación",
-        description: "Credenciales incorrectas",
-        variant: "destructive",
-      })
+      // Fallback to demo credentials
+      if (activeRole === "assistant" && formData.username === "ayudante" && formData.password === "123456") {
+        localStorage.setItem("user", JSON.stringify({ role: "assistant", name: "Ayudantía" }))
+        router.push("/dashboard/assistant")
+      } else if (activeRole === "management" && formData.username === "jefe" && formData.password === "123456") {
+        localStorage.setItem("user", JSON.stringify({ role: "management", name: "Jefatura" }))
+        router.push("/dashboard/management")
+      } else {
+        toast({
+          title: "Error de autenticación",
+          description: "Credenciales incorrectas",
+          variant: "destructive",
+        })
+      }
     }
   }
 
@@ -66,15 +96,15 @@ export default function LoginPage() {
 
         <Tabs
           value={activeRole}
-          onValueChange={(value) => setActiveRole(value as "secretary" | "management")}
+          onValueChange={(value) => setActiveRole(value as "assistant" | "management")}
           className="w-full"
         >
           <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="secretary">Secretaría</TabsTrigger>
+            <TabsTrigger value="assistant">Ayudantía</TabsTrigger>
             <TabsTrigger value="management">Jefatura</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="secretary">
+          <TabsContent value="assistant">
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
@@ -100,12 +130,12 @@ export default function LoginPage() {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <p>Para demostración:</p>
-                  <p>Usuario: secretaria / Contraseña: 123456</p>
+                  <p>Usuario: ayudante / Contraseña: 123456</p>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button type="submit" className="w-full">
-                  Ingresar como Secretaría
+                  Ingresar como Ayudantía
                 </Button>
               </CardFooter>
             </form>
@@ -137,12 +167,13 @@ export default function LoginPage() {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <p>Para demostración:</p>
-                  <p>Usuario: jefe / Contraseña: 123456</p>
+                  <p>Usuario jefe: jefe / Contraseña: 123456</p>
+                  <p>Usuario admin: admin / Contraseña: admin123</p>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button type="submit" className="w-full">
-                  Ingresar como Jefatura
+                  Ingresar como Jefatura/Admin
                 </Button>
               </CardFooter>
             </form>
